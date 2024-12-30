@@ -247,11 +247,13 @@ func newK8S(master, kubeconfig string, daemonMode string) (Kubernetes, error) {
 	}
 
 	nodeName, err := getNodeName(client)
+	log.Warnf("node name: %s", nodeName)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed getting node name")
 	}
 
 	daemonNamespace := os.Getenv("POD_NAMESPACE")
+	log.Warnf("daemon namespace: %s", daemonNamespace)
 	if len(daemonNamespace) == 0 {
 		daemonNamespace = "kube-system"
 		log.Warnf("POD_NAMESPACE is not set in environment variables, use kube-system as default namespace")

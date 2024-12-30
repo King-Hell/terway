@@ -62,7 +62,7 @@ subjects:
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: eni-config
+  name: eni-config-windows
   namespace: kube-system
 data:
   eni_conf: |
@@ -213,6 +213,10 @@ spec:
         - operator: "Exists"
       serviceAccountName: terway
       hostNetwork: true
+      securityContext:
+        windowsOptions:
+          hostProcess: true
+          runAsUserName: NT AUTHORITY\SYSTEM
       priorityClassName: system-node-critical
       affinity:
         nodeAffinity:
@@ -247,7 +251,7 @@ spec:
       containers:
         - name: terway
           command:
-            - pwsh.exe
+            - powershell.exe
             - -NoLogo
             - -NonInteractive
             - -File
@@ -271,6 +275,8 @@ spec:
                   fieldPath: metadata.name
             - name: CONTAINER_NAME
               value: "terway"
+            - name: PATH
+              value: C:\Windows\System32;C:\Windows;C:\Windows\system32\WindowsPowerShell\v1.0
           image: registry.aliyuncs.com/acs/terway:v1.0.10.333-gfd2b7b8-aliyun
           imagePullPolicy: Always
           resources:
@@ -278,8 +284,8 @@ spec:
               cpu: "100m"
               memory: "100Mi"
             limits:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: "200m"
+              memory: "200Mi"
           volumeMounts:
             - name: addon-token
               mountPath: 'c:/var/addon'
@@ -295,11 +301,9 @@ spec:
               mountPath: 'c:/host/etc/cni/net.d/'
             - name: project-run-eni
               mountPath: 'c:/var/run/eni/'
-            - name: project-wins-pipe
-              mountPath: \\.\pipe\rancher_wins
         - name: policy
           command:
-            - pwsh.exe
+            - powershell.exe
             - -NoLogo
             - -NonInteractive
             - -File
@@ -308,7 +312,7 @@ spec:
             - name: DISABLE_POLICY
               valueFrom:
                 configMapKeyRef:
-                  name: eni-config
+                  name: eni-config-windows
                   key: disable_network_policy
                   optional: true
             - name: NETWORK_NAME_REGEX
@@ -327,6 +331,8 @@ spec:
               value: 'application/vnd.kubernetes.protobuf'
             - name: FELIX_KUBECLIENTACCEPTCONTENTTYPES
               value: 'application/vnd.kubernetes.protobuf,application/json'
+            - name: PATH
+              value: C:\Windows\System32;C:\Windows;C:\Windows\system32\WindowsPowerShell\v1.0
           image: registry.aliyuncs.com/acs/terway:v1.0.10.333-gfd2b7b8-aliyun
           imagePullPolicy: Always
           resources:
@@ -334,15 +340,13 @@ spec:
               cpu: "100m"
               memory: "100Mi"
             limits:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: "200m"
+              memory: "200Mi"
           volumeMounts:
             - name: static-rules
               mountPath: 'c:/etc/rules/'
             - name: host-binary
               mountPath: 'c:/host/opt/bin/'
-            - name: project-wins-pipe
-              mountPath: \\.\pipe\rancher_wins
       volumes:
         - name: addon-token
           secret:
@@ -352,7 +356,7 @@ spec:
                 path: token-config
         - name: config
           configMap:
-            name: eni-config
+            name: eni-config-windows
             items:
               - key: eni_conf
                 path: eni.json
@@ -360,7 +364,7 @@ spec:
                 path: 10-terway.conf
         - name: static-rules
           configMap:
-            name: eni-config
+            name: eni-config-windows
             items:
               - key: static-rules.json
                 path: static-rules.json
@@ -385,10 +389,6 @@ spec:
           hostPath:
             path: 'c:/var/run/eni'
             type: DirectoryOrCreate
-        - name: project-wins-pipe
-          hostPath:
-            path: \\.\pipe\rancher_wins
-            type: ''
 
 ---
 apiVersion: apiextensions.k8s.io/v1beta1

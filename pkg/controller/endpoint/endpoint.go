@@ -26,16 +26,6 @@ type Endpoint struct {
 	PodIP     string
 	Name      string
 	Namespace string
-	Port      int32
-}
-
-func New(name, namespace, podIP string, port int32) *Endpoint {
-	return &Endpoint{
-		PodIP:     podIP,
-		Name:      name,
-		Namespace: namespace,
-		Port:      port,
-	}
 }
 
 func (m *Endpoint) Start(ctx context.Context) error {
@@ -65,7 +55,7 @@ func (m *Endpoint) RegisterEndpoints() error {
 			Ports: []v1.EndpointPort{
 				{
 					Name:     "https",
-					Port:     m.Port,
+					Port:     4443,
 					Protocol: "TCP",
 				},
 			},

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -29,13 +28,11 @@ import (
 	"github.com/AliyunContainerService/terway/pkg/utils"
 	"github.com/AliyunContainerService/terway/rpc"
 	"github.com/AliyunContainerService/terway/types"
-
 	"github.com/containernetworking/cni/libcni"
 	containertypes "github.com/containernetworking/cni/pkg/types"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	k8sErr "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
@@ -100,7 +97,7 @@ func (n *networkService) getResourceManagerForRes(resType string) ResourceManage
 	return n.mgrForResource[resType]
 }
 
-//return resource relation in db, or return nil.
+// return resource relation in db, or return nil.
 func (n *networkService) getPodResource(info *types.PodInfo) (types.PodResources, error) {
 	obj, err := n.resourceDB.Get(podInfoKey(info.Namespace, info.Name))
 	if err == nil {
@@ -1461,15 +1458,15 @@ func newNetworkService(configFilePath, kubeconfig, master, daemonMode string) (r
 	}
 
 	//start gc loop
-	netSrv.startGarbageCollectionLoop()
-	period := poolCheckPeriod
-	periodCfg := os.Getenv("POOL_CHECK_PERIOD_SECONDS")
-	periodSeconds, err := strconv.Atoi(periodCfg)
-	if err == nil {
-		period = time.Duration(periodSeconds) * time.Second
-	}
+	//netSrv.startGarbageCollectionLoop()
+	//period := poolCheckPeriod
+	//periodCfg := os.Getenv("POOL_CHECK_PERIOD_SECONDS")
+	//periodSeconds, err := strconv.Atoi(periodCfg)
+	//if err == nil {
+	//    period = time.Duration(periodSeconds) * time.Second
+	//}
 
-	go wait.JitterUntil(netSrv.startPeriodCheck, period, 1, true, wait.NeverStop)
+	//go wait.JitterUntil(netSrv.startPeriodCheck, period, 1, true, wait.NeverStop)
 
 	// register for tracing
 	_ = tracing.Register(tracing.ResourceTypeNetworkService, "default", netSrv)
@@ -1524,7 +1521,7 @@ func restoreLocalENIRes(ecs ipam.API, k8s Kubernetes, resourceDB storage.Storage
 	return nil
 }
 
-//setup default value
+// setup default value
 func setDefault(cfg *types.Configure) error {
 	if cfg.EniCapRatio == 0 {
 		cfg.EniCapRatio = 1

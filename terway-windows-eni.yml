@@ -188,8 +188,6 @@ spec:
               mountPath: 'c:/host/etc/cni/net.d/'
             - name: project-run-eni
               mountPath: 'c:/var/run/eni/'
-            - name: project-wins-pipe
-              mountPath: \\.\pipe\rancher_wins
         # doesn't support NetworkPolicy in ENIOnly mode
       volumes:
         - name: addon-token
@@ -226,7 +224,3 @@ spec:
           hostPath:
             path: 'c:/var/run/eni'
             type: DirectoryOrCreate
-        - name: project-wins-pipe
-          hostPath:
-            path: \\.\pipe\rancher_wins
-            type: ''
